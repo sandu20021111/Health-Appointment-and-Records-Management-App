@@ -10,7 +10,7 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android; // Meka wenas kara
+        return android;
       default:
         throw UnsupportedError('Platform not supported');
     }

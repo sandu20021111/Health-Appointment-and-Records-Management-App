@@ -11,6 +11,11 @@ class Appointment {
   final String status; // 'Booked', 'Cancelled', 'Completed'
   final DateTime createdAt;
 
+  // Optional medical record fields
+  final String? diagnosis;
+  final String? symptoms;
+  final String? notes;
+
   Appointment({
     required this.appointmentId,
     required this.patientId,
@@ -21,6 +26,9 @@ class Appointment {
     required this.timeSlot,
     required this.status,
     required this.createdAt,
+    this.diagnosis,
+    this.symptoms,
+    this.notes,
   });
 
   factory Appointment.fromMap(Map<String, dynamic> data) {
@@ -34,6 +42,11 @@ class Appointment {
       timeSlot: data['timeSlot'] ?? '',
       status: data['status'] ?? 'Booked',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+
+      // Optional medical record fields
+      diagnosis: data['diagnosis'],
+      symptoms: data['symptoms'],
+      notes: data['notes'],
     );
   }
 
@@ -48,6 +61,9 @@ class Appointment {
       'timeSlot': timeSlot,
       'status': status,
       'createdAt': createdAt,
+      'diagnosis': diagnosis,
+      'symptoms': symptoms,
+      'notes': notes,
     };
   }
 }

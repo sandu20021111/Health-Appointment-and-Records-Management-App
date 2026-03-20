@@ -5,7 +5,6 @@ import '../../services/firestore_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/medical_record_model.dart';
 import '../../models/prescription_model.dart';
-import '../../models/report_model.dart';
 
 class MedicalHistoryScreen extends StatelessWidget {
   const MedicalHistoryScreen({super.key});
@@ -97,6 +96,9 @@ class MedicalHistoryScreen extends StatelessWidget {
                   StreamBuilder<List<Prescription>>(
                     stream: firestoreService.getPrescriptionsForRecord(record.recordId),
                     builder: (context, pSnapshot) {
+                      if (pSnapshot.connectionState == ConnectionState.waiting) {
+                        return const LinearProgressIndicator();
+                      }
                       if (!pSnapshot.hasData || pSnapshot.data!.isEmpty) {
                         return const Text('No prescriptions added', style: TextStyle(color: Colors.grey, fontSize: 13));
                       }
@@ -105,22 +107,7 @@ class MedicalHistoryScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 20),
-
-                  // Reports Section
-                  _buildSectionTitle(Icons.picture_as_pdf_outlined, 'Medical Reports'),
-                  StreamBuilder<List<Report>>(
-                    stream: firestoreService.getReportsForRecord(record.recordId),
-                    builder: (context, rSnapshot) {
-                      if (!rSnapshot.hasData || rSnapshot.data!.isEmpty) {
-                        return const Text('No reports available', style: TextStyle(color: Colors.grey, fontSize: 13));
-                      }
-                      return Wrap(
-                        spacing: 8,
-                        children: rSnapshot.data!.map((r) => _buildReportChip(context, r)).toList(),
-                      );
-                    },
-                  ),
+                  // Medical Reports කොටස මෙතැනින් ඉවත් කරන ලදී.
                 ],
               ),
             ),
@@ -167,18 +154,6 @@ class MedicalHistoryScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildReportChip(BuildContext context, Report r) {
-    return ActionChip(
-      avatar: const Icon(Icons.file_present_rounded, size: 16, color: Colors.redAccent),
-      label: Text(r.reportName, style: const TextStyle(fontSize: 12)),
-      onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Opening ${r.reportName}...')));
-      },
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey[300]!)),
     );
   }
 

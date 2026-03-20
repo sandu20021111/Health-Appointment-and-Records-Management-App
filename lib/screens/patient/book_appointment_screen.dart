@@ -109,7 +109,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back to dashboard
                 },
-                child: const Text("Go to My Appointments"),
+                child: const Text("Go to Home"),
               ),
             ),
           ],

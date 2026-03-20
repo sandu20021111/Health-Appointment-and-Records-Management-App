@@ -29,13 +29,12 @@ class DoctorAppointmentsScreen extends StatelessWidget {
           }
 
           final appointments = snapshot.data!;
-
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             itemCount: appointments.length,
             itemBuilder: (context, index) {
               final appointment = appointments[index];
-              return _buildAppointmentCard(context, appointment);
+              return _buildAppointmentCard(context, appointment, firestoreService);
             },
           );
         },
@@ -43,9 +42,7 @@ class DoctorAppointmentsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppointmentCard(BuildContext context, Appointment appointment) {
-    final dateStr = DateFormat('EEE, d MMM').format(appointment.appointmentDate);
-
+  Widget _buildAppointmentCard(BuildContext context, Appointment appointment, FirestoreService firestoreService) {
     Color statusColor;
     switch (appointment.status) {
       case 'Booked': statusColor = Colors.blue; break;
@@ -57,9 +54,7 @@ class DoctorAppointmentsScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => AppointmentDetailsScreen(appointment: appointment),
-        ),
+        MaterialPageRoute(builder: (_) => AppointmentDetailsScreen(appointment: appointment)),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -67,9 +62,7 @@ class DoctorAppointmentsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4)),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))],
         ),
         child: Row(
           children: [
@@ -82,14 +75,10 @@ class DoctorAppointmentsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(
-                    DateFormat('d').format(appointment.appointmentDate),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-                  ),
-                  Text(
-                    DateFormat('MMM').format(appointment.appointmentDate),
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor),
-                  ),
+                  Text(DateFormat('d').format(appointment.appointmentDate),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+                  Text(DateFormat('MMM').format(appointment.appointmentDate),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor)),
                 ],
               ),
             ),
@@ -100,10 +89,8 @@ class DoctorAppointmentsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Patient: ${appointment.patientId.substring(0, 8).toUpperCase()}", // Ideally fetch name
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                  Text("Patient: ${appointment.patientId.substring(0, 8).toUpperCase()}",
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -119,14 +106,41 @@ class DoctorAppointmentsScreen extends StatelessWidget {
             // Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                appointment.status,
-                style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
+              decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              child: Text(appointment.status, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+            ),
+
+            const SizedBox(width: 8),
+
+            // Delete Button
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Delete Appointment'),
+                    content: const Text('Are you sure you want to delete this appointment?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                      ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  try {
+                    await firestoreService.deleteAppointment(appointment.appointmentId);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Appointment deleted'), backgroundColor: Colors.redAccent),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error deleting appointment: $e')),
+                    );
+                  }
+                }
+              },
             ),
           ],
         ),
@@ -134,16 +148,14 @@ class DoctorAppointmentsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.calendar_today_outlined, size: 70, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          const Text("No appointments found", style: TextStyle(color: Colors.grey, fontSize: 16)),
-        ],
-      ),
-    );
-  }
+  Widget _buildEmptyState() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.calendar_today_outlined, size: 70, color: Colors.grey[300]),
+        const SizedBox(height: 16),
+        const Text("No appointments found", style: TextStyle(color: Colors.grey, fontSize: 16)),
+      ],
+    ),
+  );
 }

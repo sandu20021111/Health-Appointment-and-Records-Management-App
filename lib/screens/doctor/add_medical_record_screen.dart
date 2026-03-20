@@ -215,33 +215,7 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
               else
                 ..._prescriptions.map((p) => _buildPrescriptionTile(p)),
 
-              const SizedBox(height: 30),
-
-              // --- Report Upload Placeholder ---
-              _buildSectionTitle("Attachments"),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: () {}, // Placeholder for upload
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.blue.shade100, style: BorderStyle.solid),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.cloud_upload_outlined, size: 40, color: Colors.blue.shade300),
-                      const SizedBox(height: 8),
-                      const Text("Upload Laboratory Reports", style: TextStyle(fontWeight: FontWeight.w500)),
-                      const Text("Support PDF, PNG, JPG", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
+              const SizedBox(height: 50),
 
               // --- Final Save Button ---
               SizedBox(
